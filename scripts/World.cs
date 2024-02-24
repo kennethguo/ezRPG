@@ -29,4 +29,8 @@ public partial class World : Node2D
 			GetTree().ChangeSceneToFile("res://scenes/cliffside.tscn");
 		}
 	}
+	
+	private void TestFunc() {
+		// Empty func for git test
+	}
 }

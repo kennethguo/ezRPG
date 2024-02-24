@@ -25,6 +25,11 @@ window/stretch/mode="canvas_items"
 
 project/assembly_name="Ez Rpg"
 
+[editor]
+
+version_control/plugin_name="GitPlugin"
+version_control/autoload_on_startup=true
+
 [input]
 
 left={
