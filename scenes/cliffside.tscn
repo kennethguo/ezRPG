@@ -1,8 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3ix6q1psl4mi"]
+[gd_scene load_steps=5 format=3 uid="uid://b3ix6q1psl4mi"]
 
 [ext_resource type="TileSet" uid="uid://d372lnlo7cdqr" path="res://TileSet.tres" id="1_7t70f"]
+[ext_resource type="Script" path="res://scenes/Cliffside.cs" id="1_yo4cj"]
+[ext_resource type="PackedScene" uid="uid://ddbyq7k41cww0" path="res://scenes/player.tscn" id="2_reew6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ct2ps"]
+size = Vector2(127, 46)
 
 [node name="cliffside" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_yo4cj")
 
 [node name="TileMap" type="TileMap" parent="."]
 y_sort_enabled = true
@@ -18,8 +25,19 @@ layer_2/name = "ysort"
 layer_2/y_sort_enabled = true
 layer_2/tile_data = PackedInt32Array(786444, 8, 5, 786438, 8, 5, 720904, 8, 5, 131086, 393224, 7, 786447, 655368, 7, 720900, 8, 5, 786449, 393224, 7, 851982, 393224, 7, 851972, 8, 1)
 
+[node name="Player" parent="." instance=ExtResource("2_reew6")]
+position = Vector2(418, 524)
+
 [node name="Collisions" type="StaticBody2D" parent="."]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Collisions"]
 position = Vector2(108, 555)
 polygon = PackedVector2Array(-17, -44, 244, -18, 260, 58, 373, 55, 379, -2, 640, -58, 667, -32, 395, 18, 390, 80, 236, 80, 227, 16, -23, -8)
+
+[node name="WorldEntrance" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldEntrance"]
+position = Vector2(421.5, 595)
+shape = SubResource("RectangleShape2D_ct2ps")
+
+[connection signal="body_entered" from="WorldEntrance" to="." method="OnWorldEntranceBodyEntered"]

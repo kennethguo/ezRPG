@@ -63,6 +63,17 @@ public partial class Player : CharacterBody2D
 		MoveAndSlide();
 	}
 	
+	public void SetCameraLimits(TileMap tilemap) {
+		var mapLimits = tilemap.GetUsedRect();
+		var mapCellSize = tilemap.TileSet.TileSize;
+		var mapScale = tilemap.Scale.X;
+		
+		GetNode<Camera2D>("Camera2D").LimitLeft = (int)(mapLimits.Position.X * mapCellSize.X * mapScale);
+		GetNode<Camera2D>("Camera2D").LimitRight = (int)(mapLimits.End.X * mapCellSize.X * mapScale);
+		GetNode<Camera2D>("Camera2D").LimitTop = (int)(mapLimits.Position.Y * mapCellSize.Y * mapScale);
+		GetNode<Camera2D>("Camera2D").LimitBottom = (int)(mapLimits.End.Y * mapCellSize.Y * mapScale);
+	}
+	
 	private void PlayAttackAnimation(Vector2 direction) {
 		if (Input.IsActionJustPressed("attack") & !attackCooldown) {
 			isAttacking = true;
