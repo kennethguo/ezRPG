@@ -127,6 +127,14 @@ shape = SubResource("CircleShape2D_5lt3r")
 [node name="DamageCooldown" type="Timer" parent="."]
 wait_time = 0.5
 
+[node name="HealthBar" type="ProgressBar" parent="."]
+offset_left = -10.0
+offset_top = 4.66667
+offset_right = 190.0
+offset_bottom = 31.6667
+scale = Vector2(0.1, 0.1)
+show_percentage = false
+
 [connection signal="body_entered" from="DetectionArea" to="." method="OnDetectionAreaBodyEntered"]
 [connection signal="body_exited" from="DetectionArea" to="." method="OnDetectionAreaBodyExited"]
 [connection signal="timeout" from="DamageCooldown" to="." method="OnDamageCooldownTimeout"]

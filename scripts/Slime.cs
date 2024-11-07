@@ -15,6 +15,8 @@ public partial class Slime : CharacterBody2D
 	private Timer damageCooldownTimer;
 	private bool damageCooldown = false;
 	
+	private ProgressBar healthBar;
+	
 	private Player player;
 	
 	private AnimationPlayer anim;
@@ -25,8 +27,9 @@ public partial class Slime : CharacterBody2D
 		sprite = GetNode<Sprite2D>("SlimeSprite");
 		anim.Play("idle");
 		
-		player = GetNode<Player>("/root/world/Player");
+		player = GetNode<Player>($"/root/{GetTree().CurrentScene.Name}/Player");
 		damageCooldownTimer = GetNode<Timer>("DamageCooldown");
+		healthBar = GetNode<ProgressBar>("HealthBar");
 	}
 	
 	public override void _PhysicsProcess(double delta) {
@@ -48,6 +51,8 @@ public partial class Slime : CharacterBody2D
 			QueueFree(); 
 		}
 		
+		UpdateHealth();
+		
 		Velocity = velocity;
 		MoveAndSlide();
 		//MoveAndCollide(Velocity * (float)delta);
@@ -60,10 +65,27 @@ public partial class Slime : CharacterBody2D
 	
 	private void OnPlayerAttack() {
 		if (player.enemyInAttackRange & player.isAttacking & !damageCooldown) {
-			health -= 20;
+			health -= player.damage;
 			damageCooldown = true;
 			damageCooldownTimer.Start();
-			GD.Print(health);
+		}
+	}
+	
+	private void UpdateHealth() {
+		healthBar.Value = health;
+		
+		if (health >= 100) {
+			healthBar.Visible = false;
+		}
+		else {
+			healthBar.Visible = true;
+		}
+		
+		if (health >= 50) {
+			healthBar.Modulate = new Color(0x66923dff);
+		}
+		else if (health > 0) {
+			healthBar.Modulate = new Color(0xe5652eff);
 		}
 	}
 }

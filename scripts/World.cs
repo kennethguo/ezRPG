@@ -10,12 +10,17 @@ public partial class World : Node2D
 		tilemap = GetNode<TileMap>("TileMap");
 		player = GetNode<Player>("Player");
 		
+		// Set camera limits based on tilemap
 		player.SetCameraLimits(tilemap);
+		// Set player spawn point
+		player.Position = GlobalVariables.spawnPosition;
 	}
 	
 	private void OnCliffsideEntranceBodyEntered(Node2D body) {
 		if (body.Name == "Player") {
-			GetTree().ChangeSceneToFile("res://scenes/cliffside.tscn");
+			// Below works with warnings: https://github.com/godotengine/godot/issues/85852
+			// GetTree().ChangeSceneToFile("res://scenes/cliffside.tscn");
+			GetTree().CallDeferred("change_scene_to_file","res://scenes/cliffside.tscn");
 		}
 	}
 }

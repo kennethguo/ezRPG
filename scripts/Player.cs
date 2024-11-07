@@ -3,13 +3,11 @@ using System;
 
 public partial class Player : CharacterBody2D
 {
-	public const float Speed = 300.0f;
+	// Speed
+	public static float defaultSpeed = 300.0f;
+	public float speed = defaultSpeed;
+	private float sprintModifier = 1.8f;
 	private Vector2 prevDirection = Vector2.Zero;
-	private int health = 100;
-	private bool alive = true;
-	
-	private AnimationPlayer anim;
-	private Sprite2D sprite;
 	
 	// Attack
 	private Area2D attackRange;
@@ -23,9 +21,20 @@ public partial class Player : CharacterBody2D
 	public bool enemyInAttackRange = false;
 	
 	// Damage
+	public int damage = 20;
 	private Timer damageCooldownTimer;
 	private bool inEnemyAttackRange = false;
 	private bool enemyAttackCooldown = false;
+	
+	// Health
+	private static int health = 100;
+	private bool alive = true;
+	private Timer regenTimer;
+	private ProgressBar healthBar;
+	
+	// Animations
+	private AnimationPlayer anim;
+	private Sprite2D sprite;
 	
 	public override void _Ready() {
 		anim = GetNode<AnimationPlayer>("AnimationPlayer");
@@ -34,7 +43,10 @@ public partial class Player : CharacterBody2D
 		attackRange = GetNode<Area2D>("AttackRange");
 		attackCooldownTimer = GetNode<Timer>("AttackCooldown");
 		damageCooldownTimer = GetNode<Timer>("DamageCooldown");
-
+		
+		regenTimer = GetNode<Timer>("RegenTimer");
+		healthBar = GetNode<ProgressBar>("HealthBar");
+		
 		anim.Play("front_idle");
 	}
 
@@ -43,7 +55,13 @@ public partial class Player : CharacterBody2D
 		
 		// Gets normalized vector for x and y movement
 		Vector2 direction = Input.GetVector("left", "right", "up", "down");
-		velocity = direction * Speed;
+		if (Input.IsActionPressed("sprint")) {
+			speed = defaultSpeed * sprintModifier;
+		}
+		else {
+			speed = defaultSpeed;
+		}
+		velocity = direction * speed;
 		
 		bool isIdle = velocity==Vector2.Zero;
 		if (!isAttacking) { PlayMovementAnimation(prevDirection, isIdle); }
@@ -54,10 +72,9 @@ public partial class Player : CharacterBody2D
 		
 		// Combat
 		OnEnemyAttack();
-		if (health <= 0) {
-			alive = false;
-			GD.Print("You Died!");
-		}
+		
+		//Health
+		UpdateHealth();
 
 		Velocity = velocity;
 		MoveAndSlide();
@@ -147,12 +164,42 @@ public partial class Player : CharacterBody2D
 	
 	private void OnEnemyAttack() {
 		if (inEnemyAttackRange & !enemyAttackCooldown) {
-			health -= 10;
+			health -= 20;
 			enemyAttackCooldown = true;
 			damageCooldownTimer.Start();
+			// Restart regen when taking damage
+			regenTimer.Start();
 		}
 	}
 	
 	private void OnAttackCooldownTimeout() { attackCooldown = false; }
 	private void OnDamageCooldownTimeout() { enemyAttackCooldown = false; }
+	
+	private void UpdateHealth() {
+		healthBar.Value = health;
+		
+		if (health >= 100) {
+			healthBar.Visible = false;
+		}
+		else {
+			healthBar.Visible = true;
+		}
+		
+		if (health >= 50) {
+			healthBar.Modulate = new Color(0x66923dff);
+		}
+		else if (health > 0) {
+			healthBar.Modulate = new Color(0xe5652eff);
+		}
+		else if (health <= 0) {
+			alive = false;
+			GD.Print("You Died!");
+		}
+	}
+	
+	private void OnRegenTimerTimeout() {
+		if (health > 0 & health < 100) {
+			health += 10; 
+		}
+	}
 }

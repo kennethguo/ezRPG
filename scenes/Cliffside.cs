@@ -20,7 +20,9 @@ public partial class Cliffside : Node2D
 	
 	private void OnWorldEntranceBodyEntered(Node2D body) {
 		if (body.Name == "Player") {
-			GetTree().ChangeSceneToFile("res://scenes/world.tscn");
+			// GetTree().ChangeSceneToFile("res://scenes/world.tscn");
+			GetTree().CallDeferred("change_scene_to_file","res://scenes/world.tscn");
+			GlobalVariables.spawnPosition = new Vector2 (1680,50);
 		}
 	}
 }
