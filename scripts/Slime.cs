@@ -10,14 +10,13 @@ public partial class Slime : CharacterBody2D
 	private bool chase = false;
 	private int health = 100;
 	
-	private bool inPlayerAttackRange = false;
-	
 	private Timer damageCooldownTimer;
 	private bool damageCooldown = false;
 	
 	private ProgressBar healthBar;
 	
 	private Player player;
+	private Area2D playerAttackRange;
 	
 	private AnimationPlayer anim;
 	private Sprite2D sprite;
@@ -28,6 +27,7 @@ public partial class Slime : CharacterBody2D
 		anim.Play("idle");
 		
 		player = GetNode<Player>($"/root/{GetTree().CurrentScene.Name}/Player");
+		playerAttackRange = GetNode<Area2D>($"/root/{GetTree().CurrentScene.Name}/Player/AttackRange");
 		damageCooldownTimer = GetNode<Timer>("DamageCooldown");
 		healthBar = GetNode<ProgressBar>("HealthBar");
 	}
@@ -64,10 +64,12 @@ public partial class Slime : CharacterBody2D
 	private void OnDamageCooldownTimeout() { damageCooldown = false; }
 	
 	private void OnPlayerAttack() {
-		if (player.enemyInAttackRange & player.isAttacking & !damageCooldown) {
-			health -= player.damage;
-			damageCooldown = true;
-			damageCooldownTimer.Start();
+		if (playerAttackRange.OverlapsBody(this)) { 
+			if (player.enemyInAttackRange & player.isAttacking & !damageCooldown) {
+				health -= player.damage;
+				damageCooldown = true;
+				damageCooldownTimer.Start();
+			}
 		}
 	}
 	

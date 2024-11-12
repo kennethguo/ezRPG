@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b8xipp4ykm5vr"]
+[gd_scene load_steps=7 format=3 uid="uid://b8xipp4ykm5vr"]
 
 [ext_resource type="Script" path="res://scripts/World.cs" id="1_52cid"]
 [ext_resource type="TileSet" uid="uid://d372lnlo7cdqr" path="res://TileSet.tres" id="2_05hq2"]
@@ -7,6 +7,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wskf4"]
 size = Vector2(100, 135)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qtto0"]
+size = Vector2(220, 387)
 
 [node name="world" type="Node2D"]
 y_sort_enabled = true
@@ -34,6 +37,12 @@ position = Vector2(-72, -55)
 [node name="Slime" parent="." instance=ExtResource("8_tnp6v")]
 position = Vector2(465, 426)
 
+[node name="Slime2" parent="." instance=ExtResource("8_tnp6v")]
+position = Vector2(561, 850)
+
+[node name="Slime3" parent="." instance=ExtResource("8_tnp6v")]
+position = Vector2(845, 664)
+
 [node name="Collisions" type="StaticBody2D" parent="."]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Collisions"]
@@ -45,4 +54,11 @@ polygon = PackedVector2Array(2, 28, 1629, 31, 1629, -134, 1729, -134, 1729, 33, 
 position = Vector2(1679, -67.5)
 shape = SubResource("RectangleShape2D_wskf4")
 
+[node name="WorldExit" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldExit"]
+position = Vector2(2522, 933.5)
+shape = SubResource("RectangleShape2D_qtto0")
+
 [connection signal="body_entered" from="CliffsideEntrance" to="." method="OnCliffsideEntranceBodyEntered"]
+[connection signal="body_entered" from="WorldExit" to="." method="OnWorldExitBodyEntered"]

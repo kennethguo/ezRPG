@@ -86,7 +86,7 @@ radius = 83.0007
 [sub_resource type="CircleShape2D" id="CircleShape2D_5lt3r"]
 radius = 9.33333
 
-[node name="Slime" type="CharacterBody2D"]
+[node name="Slime" type="CharacterBody2D" groups=["enemy"]]
 y_sort_enabled = true
 scale = Vector2(3, 3)
 collision_mask = 3

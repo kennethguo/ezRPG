@@ -28,9 +28,10 @@ public partial class Player : CharacterBody2D
 	
 	// Health
 	private static int health = 100;
-	private bool alive = true;
-	private Timer regenTimer;
 	private ProgressBar healthBar;
+	private Timer regenTimer;
+	private bool isAlive = true;
+	private Timer respawnTimer;
 	
 	// Animations
 	private AnimationPlayer anim;
@@ -44,40 +45,43 @@ public partial class Player : CharacterBody2D
 		attackCooldownTimer = GetNode<Timer>("AttackCooldown");
 		damageCooldownTimer = GetNode<Timer>("DamageCooldown");
 		
-		regenTimer = GetNode<Timer>("RegenTimer");
 		healthBar = GetNode<ProgressBar>("HealthBar");
+		regenTimer = GetNode<Timer>("RegenTimer");
+		respawnTimer = GetNode<Timer>("RespawnTimer");
 		
-		anim.Play("front_idle");
+		anim.Play("side_idle");
 	}
 
 	public override void _PhysicsProcess(double delta) {
 		Vector2 velocity = Velocity;
 		
-		// Gets normalized vector for x and y movement
-		Vector2 direction = Input.GetVector("left", "right", "up", "down");
-		if (Input.IsActionPressed("sprint")) {
-			speed = defaultSpeed * sprintModifier;
-		}
-		else {
-			speed = defaultSpeed;
-		}
-		velocity = direction * speed;
-		
-		bool isIdle = velocity==Vector2.Zero;
-		if (!isAttacking) { PlayMovementAnimation(prevDirection, isIdle); }
-		PlayAttackAnimation(prevDirection);
-		
-		// Only update direction if player starts moving again
-		if (!isIdle) { prevDirection = direction; }
-		
-		// Combat
-		OnEnemyAttack();
-		
-		//Health
-		UpdateHealth();
+		if (isAlive) {
+			// Gets normalized vector for x and y movement
+			Vector2 direction = Input.GetVector("left", "right", "up", "down");
+			if (Input.IsActionPressed("sprint")) {
+				speed = defaultSpeed * sprintModifier;
+			}
+			else {
+				speed = defaultSpeed;
+			}
+			velocity = direction * speed;
+			
+			bool isIdle = velocity==Vector2.Zero;
+			if (!isAttacking & isAlive) { PlayMovementAnimation(prevDirection, isIdle); }
+			PlayAttackAnimation(prevDirection);
+			
+			// Only update direction if player starts moving again
+			if (!isIdle) { prevDirection = direction; }
+			
+			// Combat
+			OnEnemyAttack();
+			
+			//Health
+			UpdateHealth();
 
-		Velocity = velocity;
-		MoveAndSlide();
+			Velocity = velocity;
+			MoveAndSlide();
+		}
 	}
 	
 	public void SetCameraLimits(TileMap tilemap) {
@@ -117,6 +121,9 @@ public partial class Player : CharacterBody2D
 			attackCooldown = true;
 			attackCooldownTimer.Start();
 		}
+		else if ((string)anim_name == "death") {
+			respawnTimer.Start();
+		}
 	}
 	
 	private void PlayMovementAnimation(Vector2 direction, bool idle) {
@@ -138,34 +145,39 @@ public partial class Player : CharacterBody2D
 		}
 	}
 	
+	private void PlayDeathAnimation() {
+		anim.SpeedScale = 1;
+		anim.Play("death");
+	}
+	
 	private void OnAttackRangeBodyEntered(Node2D body) {
-		if (body.Name == "Slime") {
+		if (body.IsInGroup("enemy")) {
 			enemyInAttackRange = true;
 		}
 	}
 	
 	private void OnAttackRangeBodyExited(Node2D body) {
-		if (body.Name == "Slime") {
+		if (body.IsInGroup("enemy")) {
 			enemyInAttackRange = false;
 		}
 	}
 	
 	private void OnHitboxBodyEntered(Node2D body) {
-		if (body.Name == "Slime") {
+		if (body.IsInGroup("enemy")) {
 			inEnemyAttackRange = true;
 		}
 	}
 	
 	private void OnHitboxBodyExited(Node2D body) {
-		if (body.Name == "Slime") {
+		if (body.IsInGroup("enemy")) {
 			inEnemyAttackRange = false;
 		}
 	}
 	
 	private void OnEnemyAttack() {
-		if (inEnemyAttackRange & !enemyAttackCooldown) {
-			health -= 20;
-			enemyAttackCooldown = true;
+		if (inEnemyAttackRange & !enemyAttackCooldown) { 
+			health -= 30;
+			enemyAttackCooldown = true; // Cooldown should be for each enemy but I can't be bothered fixing
 			damageCooldownTimer.Start();
 			// Restart regen when taking damage
 			regenTimer.Start();
@@ -192,8 +204,8 @@ public partial class Player : CharacterBody2D
 			healthBar.Modulate = new Color(0xe5652eff);
 		}
 		else if (health <= 0) {
-			alive = false;
-			GD.Print("You Died!");
+			isAlive = false;
+			PlayDeathAnimation();
 		}
 	}
 	
@@ -201,5 +213,11 @@ public partial class Player : CharacterBody2D
 		if (health > 0 & health < 100) {
 			health += 10; 
 		}
+	}
+	
+	private void OnRespawnTimerTimeout() {
+		isAlive = true;
+		health = 100;
+		GetTree().CallDeferred("change_scene_to_file","res://scenes/world.tscn");
 	}
 }

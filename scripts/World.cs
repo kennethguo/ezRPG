@@ -23,4 +23,11 @@ public partial class World : Node2D
 			GetTree().CallDeferred("change_scene_to_file","res://scenes/cliffside.tscn");
 		}
 	}
+	
+	private void OnWorldExitBodyEntered(Node2D body) {
+		if (body.Name == "Player") {
+			GetTree().CallDeferred("change_scene_to_file","res://scenes/menu.tscn");
+			GlobalVariables.spawnPosition = new Vector2 (60,250);
+		}
+	}
 }
